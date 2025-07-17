@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  polycode-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: polycode-app
+    ports:
+      - "3100:3000"  # Docker app runs on port 3100 to avoid conflicts with local dev
+      # Expose ports for full-stack mode (3101-3120 mapped to 3001-3020)
+      - "3101-3120:3001-3020"
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+      - DOCKER_ENV=true
+      - DOCKER_PORT_OFFSET=100
+    volumes:
+      # Optional: Mount temp-projects if you need persistent storage
+      - ./temp-projects:/app/temp-projects
+    restart: unless-stopped
+    networks:
+      - polycode-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]  # Internal port
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Add nginx for reverse proxy (uncomment if needed)
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: polycode-nginx
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #   depends_on:
+  #     - polycode-app
+  #   restart: unless-stopped
+
+networks:
+  polycode-network:
+    driver: bridge 

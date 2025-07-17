@@ -61,8 +61,15 @@ export async function POST(request: NextRequest) {
       
       // Check if it's a complete Express app or just routes
       if (nodejs.includes('express') || nodejs.includes('app.listen')) {
-        // Complete Express app
-        serverCode = nodejs;
+        // Complete Express app - modify to bind to 0.0.0.0 for Docker compatibility
+        serverCode = nodejs.replace(
+          /app\.listen\s*\(\s*([^,)]+)\s*,?\s*([^)]*)\)/g,
+          (match, port, callback) => {
+            // If callback is provided, keep it; otherwise use empty function
+            const cb = callback.trim() ? callback : '() => {}'
+            return `app.listen(${port}, '0.0.0.0', ${cb})`
+          }
+        );
       } else {
         // Just routes - wrap in Express app
         serverCode = `
@@ -91,7 +98,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(\`🚀 PolyCode app running on http://localhost:\${PORT}\`);
   console.log(\`📁 Project ID: ${projectId}\`);
 });
@@ -118,7 +125,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(\`🌐 PolyCode static site running on http://localhost:\${PORT}\`);
   console.log(\`📁 Project ID: ${projectId}\`);
 });
@@ -297,10 +304,16 @@ window.callAPI = callAPI;
         const response = await fetch(`http://localhost:${port}`);
         const isRunning = response.ok;
 
+        // Determine the correct external URL (adjust for Docker)
+        const isDocker = process.env.DOCKER_ENV === 'true';
+        const portOffset = isDocker ? parseInt(process.env.DOCKER_PORT_OFFSET || '100') : 0;
+        const externalPort = port + portOffset;
+        const externalUrl = `http://localhost:${externalPort}`;
+
         return NextResponse.json({
           success: true,
           projectId,
-          url: `http://localhost:${port}`,
+          url: externalUrl,
           message: isRunning 
             ? `🚀 Full-stack application is running on port ${port}!`
             : `⚠️ Server started but may still be initializing...`,
@@ -318,11 +331,17 @@ window.callAPI = callAPI;
           }
         });
       } catch (fetchError) {
+        // Determine the correct external URL (adjust for Docker)
+        const isDocker = process.env.DOCKER_ENV === 'true';
+        const portOffset = isDocker ? parseInt(process.env.DOCKER_PORT_OFFSET || '100') : 0;
+        const externalPort = port + portOffset;
+        const externalUrl = `http://localhost:${externalPort}`;
+
         return NextResponse.json({
           success: true,
           projectId,
-          url: `http://localhost:${port}`,
-          message: `🔄 Server is starting... Check http://localhost:${port} in a few seconds`,
+          url: externalUrl,
+          message: `🔄 Server is starting... Check ${externalUrl} in a few seconds`,
           files: {
             'server.js': hasBackend ? '✅ Express server with custom routes' : '📄 Static file server',
             'public/index.html': '🌐 HTML structure',
