@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Editor from '@monaco-editor/react';
 
 interface Question {
   id: string;
@@ -573,6 +574,27 @@ export default function ModernTestDashboard() {
     setTestResults(null);
   };
 
+  // Map our language names to Monaco editor language identifiers
+  const getMonacoLanguage = (language: string): string => {
+    const monacoMap: { [key: string]: string } = {
+      javascript: 'javascript',
+      python: 'python',
+      go: 'go',
+      java: 'java',
+      cpp: 'cpp',
+      csharp: 'csharp',
+      typescript: 'typescript',
+      php: 'php',
+      html: 'html',
+      css: 'css',
+      rust: 'rust',
+      ruby: 'ruby',
+      swift: 'swift',
+      kotlin: 'kotlin',
+    };
+    return monacoMap[language] || 'plaintext';
+  };
+
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -900,16 +922,40 @@ export default function ModernTestDashboard() {
 
             {/* Code Editor Area */}
             <div className="flex-1" style={{ background: 'var(--bg)' }}>
-              <textarea
+              <Editor
+                height="100%"
+                language={getMonacoLanguage(selectedQuestion.language)}
                 value={currentCode}
-                onChange={(e) => setCurrentCode(e.target.value)}
-                className="w-full h-full p-4 font-mono text-sm resize-none focus:outline-none"
-                style={{ 
-                  background: 'var(--bg)', 
-                  color: 'var(--text-primary)',
-                  border: 'none'
+                onChange={(value) => setCurrentCode(value || '')}
+                theme="vs-dark"
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 14,
+                  lineNumbers: 'on',
+                  roundedSelection: false,
+                  automaticLayout: true,
+                  scrollBeyondLastLine: false,
+                  wordWrap: 'on',
+                  tabSize: 2,
+                  insertSpaces: true,
+                  padding: { top: 16, bottom: 16 },
+                  fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Monaco, Menlo, "Liberation Mono", "Consolas", monospace',
+                  lineHeight: 1.6,
+                  scrollbar: {
+                    verticalScrollbarSize: 8,
+                    horizontalScrollbarSize: 8,
+                  },
+                  suggestOnTriggerCharacters: true,
+                  acceptSuggestionOnEnter: 'on',
+                  quickSuggestions: true,
+                  formatOnPaste: true,
+                  formatOnType: true,
+                  autoClosingBrackets: 'always',
+                  autoClosingQuotes: 'always',
+                  autoIndent: 'full',
+                  contextmenu: true,
+                  mouseWheelZoom: true,
                 }}
-                placeholder="// Write your solution here..."
               />
             </div>
 
@@ -1418,18 +1464,34 @@ export default function ModernTestDashboard() {
                     <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
                       Starter Code <span className="text-xs text-gray-500">(optional)</span>
                     </label>
-                    <textarea
-                      value={newQuestionForm.starterCode}
-                      onChange={(e) => setNewQuestionForm(prev => ({ ...prev, starterCode: e.target.value }))}
-                      placeholder="// Initial code template for candidates..."
-                      rows={8}
-                      className="w-full px-3 py-2 rounded border focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none font-mono"
-                      style={{ 
-                        background: 'var(--bg)', 
-                        border: '1px solid var(--border)', 
-                        color: 'var(--text-primary)'
-                      }}
-                    />
+                    <div className="h-32 rounded-md overflow-hidden" style={{ border: '1px solid var(--border)' }}>
+                      <Editor
+                        height="100%"
+                        language={getMonacoLanguage(newQuestionForm.language)}
+                        value={newQuestionForm.starterCode}
+                        onChange={(value) => setNewQuestionForm(prev => ({ ...prev, starterCode: value || '' }))}
+                        theme="vs-dark"
+                        options={{
+                          minimap: { enabled: false },
+                          fontSize: 12,
+                          lineNumbers: 'on',
+                          automaticLayout: true,
+                          scrollBeyondLastLine: false,
+                          wordWrap: 'on',
+                          tabSize: 2,
+                          insertSpaces: true,
+                          scrollbar: {
+                            verticalScrollbarSize: 6,
+                            horizontalScrollbarSize: 6,
+                          },
+                          suggestOnTriggerCharacters: true,
+                          quickSuggestions: true,
+                          formatOnPaste: true,
+                          autoClosingBrackets: 'always',
+                          contextmenu: false,
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

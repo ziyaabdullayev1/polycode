@@ -333,3 +333,62 @@ html, body {
 .btn-error:hover:not(:disabled) {
   background: #dc2626;
 }
+
+/* Monaco Editor Custom Styles */
+.monaco-editor {
+  --vscode-editor-background: var(--bg) !important;
+  --vscode-editor-foreground: var(--text-primary) !important;
+  --vscode-editorLineNumber-foreground: var(--text-muted) !important;
+  --vscode-editorLineNumber-activeForeground: var(--text-secondary) !important;
+  --vscode-editor-selectionBackground: rgba(59, 130, 246, 0.3) !important;
+  --vscode-editor-selectionHighlightBackground: rgba(59, 130, 246, 0.15) !important;
+  --vscode-editorCursor-foreground: var(--accent-primary) !important;
+  --vscode-editorWhitespace-foreground: rgba(148, 163, 184, 0.3) !important;
+  --vscode-editorIndentGuide-background: rgba(148, 163, 184, 0.1) !important;
+  --vscode-editorIndentGuide-activeBackground: rgba(148, 163, 184, 0.3) !important;
+  --vscode-editor-lineHighlightBackground: rgba(59, 130, 246, 0.05) !important;
+  --vscode-scrollbarSlider-background: rgba(148, 163, 184, 0.3) !important;
+  --vscode-scrollbarSlider-hoverBackground: rgba(148, 163, 184, 0.5) !important;
+  --vscode-scrollbarSlider-activeBackground: rgba(148, 163, 184, 0.7) !important;
+  --vscode-editorSuggestWidget-background: var(--surface) !important;
+  --vscode-editorSuggestWidget-border: var(--border) !important;
+  --vscode-editorSuggestWidget-foreground: var(--text-primary) !important;
+  --vscode-editorSuggestWidget-selectedBackground: var(--surface-hover) !important;
+  --vscode-editorHoverWidget-background: var(--surface) !important;
+  --vscode-editorHoverWidget-border: var(--border) !important;
+  --vscode-editorWidget-background: var(--surface) !important;
+  --vscode-editorWidget-border: var(--border) !important;
+  --vscode-input-background: var(--bg) !important;
+  --vscode-input-foreground: var(--text-primary) !important;
+  --vscode-input-border: var(--border) !important;
+  --vscode-inputOption-activeBorder: var(--accent-primary) !important;
+  --vscode-focusBorder: var(--accent-primary) !important;
+}
+
+.monaco-editor .margin {
+  background-color: var(--bg) !important;
+}
+
+.monaco-editor .monaco-editor-background {
+  background-color: var(--bg) !important;
+}
+
+.monaco-editor .current-line {
+  background-color: rgba(59, 130, 246, 0.05) !important;
+}
+
+/* Animation Keyframes */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
