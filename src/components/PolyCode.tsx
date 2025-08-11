@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import CodeEditor from './CodeEditor';
-import { CodeEditor as CodeEditorType, ExecutionResult } from '@/types';
+import { CodeEditor as CodeEditorType, ExecutionResult, QuestionData, QuestionMode } from '@/types';
 import { LANGUAGES, DEFAULT_EDITORS } from '@/config/languages';
 
 export default function PolyCode() {
@@ -23,6 +23,76 @@ export default function PolyCode() {
   const [fullStackMode, setFullStackMode] = useState(false);
   const [fullStackResult, setFullStackResult] = useState<any>(null);
   const [isDeploying, setIsDeploying] = useState(false);
+  const [questionMode, setQuestionMode] = useState<QuestionMode>({ enabled: false });
+  const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+
+  // Check for question parameter in URL and load question
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const questionId = urlParams.get('question');
+    
+    if (questionId) {
+      loadQuestion(questionId);
+    }
+  }, []);
+
+  // Timer functionality for timed questions
+  useEffect(() => {
+    if (questionMode.enabled && questionMode.question?.timeLimit && questionMode.startTime) {
+      const interval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - questionMode.startTime!.getTime()) / 1000 / 60);
+        const remaining = questionMode.question!.timeLimit! - elapsed;
+        
+        if (remaining <= 0) {
+          setTimeRemaining(0);
+          clearInterval(interval);
+          // Auto-submit or show time's up message
+          alert('Time\'s up! Your coding session has ended.');
+        } else {
+          setTimeRemaining(remaining);
+        }
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [questionMode.enabled, questionMode.startTime, questionMode.question?.timeLimit]);
+
+  const loadQuestion = async (questionId: string) => {
+    try {
+      const response = await fetch(`/api/question?id=${questionId}`);
+      const data = await response.json();
+      
+      if (data.success && data.question) {
+        const question: QuestionData = data.question;
+        
+        setQuestionMode({
+          enabled: true,
+          question,
+          startTime: new Date(),
+          timeRemaining: question.timeLimit
+        });
+
+        // Set up editor with question language and starter code
+        if (question.starterCode || question.language) {
+          const newEditor: CodeEditorType = {
+            id: '1',
+            language: question.language || 'javascript',
+            code: question.starterCode || LANGUAGES[question.language || 'javascript']?.defaultCode || '',
+            output: '',
+            error: '',
+            isRunning: false,
+          };
+          setEditors([newEditor]);
+        }
+
+        setTimeRemaining(question.timeLimit || null);
+      } else {
+        console.error('Failed to load question:', data.error);
+      }
+    } catch (error) {
+      console.error('Error loading question:', error);
+    }
+  };
 
   const handleCodeChange = useCallback((id: string, code: string) => {
     setEditors(prev => prev.map(editor => 
@@ -415,6 +485,106 @@ export default function PolyCode() {
           </div>
         )}
       </header>
+
+      {/* Question Display (Interview/Assessment Mode) */}
+      {questionMode.enabled && questionMode.question && (
+        <div className="bg-gradient-to-r from-blue-900 to-purple-900 border-b border-gray-700 px-6 py-4">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center space-x-3 mb-3">
+                <h2 className="text-xl font-bold text-white">{questionMode.question.title}</h2>
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  questionMode.question.difficulty === 'easy' ? 'bg-green-600 text-white' :
+                  questionMode.question.difficulty === 'medium' ? 'bg-yellow-600 text-white' :
+                  'bg-red-600 text-white'
+                }`}>
+                  {questionMode.question.difficulty.charAt(0).toUpperCase() + questionMode.question.difficulty.slice(1)}
+                </span>
+                <span className="px-3 py-1 bg-gray-700 text-gray-300 rounded-full text-sm font-medium">
+                  {questionMode.question.language}
+                </span>
+                {questionMode.question.tags && questionMode.question.tags.map((tag, index) => (
+                  <span key={index} className="px-2 py-1 bg-blue-600 text-white rounded text-xs">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              
+              <div className="text-gray-300 mb-4 whitespace-pre-wrap">
+                {questionMode.question.description}
+              </div>
+
+              {questionMode.question.expectedOutput && (
+                <div className="mb-4">
+                  <h4 className="text-sm font-medium text-gray-400 mb-2">Expected Output:</h4>
+                  <div className="bg-gray-800 rounded-md p-3 font-mono text-sm text-green-400">
+                    {questionMode.question.expectedOutput}
+                  </div>
+                </div>
+              )}
+
+              {questionMode.question.testCases && questionMode.question.testCases.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="text-sm font-medium text-gray-400 mb-2">Test Cases:</h4>
+                  <div className="space-y-2">
+                    {questionMode.question.testCases.map((testCase, index) => (
+                      <div key={index} className="bg-gray-800 rounded-md p-3 text-sm">
+                        <div className="text-gray-300 mb-1">
+                          <span className="text-blue-400">Input:</span> {testCase.input}
+                        </div>
+                        <div className="text-gray-300">
+                          <span className="text-green-400">Expected:</span> {testCase.expectedOutput}
+                        </div>
+                        {testCase.description && (
+                          <div className="text-gray-500 text-xs mt-1">{testCase.description}</div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Timer and Controls */}
+            <div className="ml-6 flex flex-col items-end space-y-3">
+              {timeRemaining !== null && (
+                <div className="bg-gray-800 rounded-lg p-4 text-center">
+                  <div className="text-sm text-gray-400 mb-1">Time Remaining</div>
+                  <div className={`text-2xl font-bold ${
+                    timeRemaining <= 5 ? 'text-red-400' : 
+                    timeRemaining <= 15 ? 'text-yellow-400' : 'text-green-400'
+                  }`}>
+                    {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
+                  </div>
+                  <div className="text-xs text-gray-500">minutes</div>
+                </div>
+              )}
+
+              {questionMode.question.hints && questionMode.question.hints.length > 0 && (
+                <details className="bg-gray-800 rounded-lg p-4 max-w-xs">
+                  <summary className="text-yellow-400 cursor-pointer text-sm font-medium">
+                    💡 Hints ({questionMode.question.hints.length})
+                  </summary>
+                  <div className="mt-2 space-y-2">
+                    {questionMode.question.hints.map((hint, index) => (
+                      <div key={index} className="text-gray-300 text-sm">
+                        {index + 1}. {hint}
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              )}
+
+              <button
+                onClick={() => setQuestionMode({ enabled: false })}
+                className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+              >
+                Exit Question Mode
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <main className="flex-1 p-3 min-h-0">

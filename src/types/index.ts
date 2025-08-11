@@ -32,4 +32,33 @@ export interface CodeExecution {
 
 export interface LanguageConfig {
   [key: string]: Language;
+}
+
+export interface TestCase {
+  input: string;
+  expectedOutput: string;
+  description?: string;
+}
+
+export interface QuestionData {
+  id: string;
+  title: string;
+  description: string;
+  language: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  starterCode?: string;
+  expectedOutput?: string;
+  testCases?: TestCase[];
+  hints?: string[];
+  timeLimit?: number; // in minutes
+  tags?: string[];
+  createdAt: Date;
+  expiresAt?: Date;
+}
+
+export interface QuestionMode {
+  enabled: boolean;
+  question?: QuestionData;
+  startTime?: Date;
+  timeRemaining?: number;
 } 
