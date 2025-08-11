@@ -109,177 +109,250 @@ export default function CodeEditor({
     return icons[lang] || lang.toUpperCase().substring(0, 2);
   };
 
+  const [activeTab, setActiveTab] = useState<'code' | 'console' | 'preview'>('code');
+  const hasChanges = editor.code !== (LANGUAGES[editor.language]?.defaultCode || '');
+
   return (
-    <div className={`flex flex-col h-full bg-gray-900 rounded-lg overflow-hidden ${className}`}>
-      {/* Tab Header */}
-      <div className="bg-gray-800 border-b border-gray-700">
+    <div className={`flex flex-col h-full overflow-hidden ${className}`} style={{ background: 'var(--surface)' }}>
+      {/* Tab Bar */}
+      <div className="tab-bar">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <div className="flex items-center space-x-2 px-4 py-3 bg-gray-900 border-r border-gray-700">
-              <div className={`w-3 h-3 rounded-full ${getLanguageColor(editor.language)}`}></div>
-              <span className="text-white font-medium text-sm">
-                {getLanguageIcon(editor.language)}
-              </span>
+            {/* Language Tab */}
+            <button
+              className={`tab ${activeTab === 'code' ? 'active' : ''} ${hasChanges ? 'dirty' : ''}`}
+              onClick={() => setActiveTab('code')}
+            >
+              <div className={`w-2 h-2 rounded-full ${getLanguageColor(editor.language)}`}></div>
+              <span>{currentLanguage?.displayName || editor.language}</span>
               <select
                 value={editor.language}
                 onChange={(e) => handleLanguageChange(e.target.value)}
-                className="bg-transparent text-white text-sm border-none outline-none cursor-pointer"
+                className="bg-transparent border-none outline-none cursor-pointer text-xs ml-1 opacity-60 hover:opacity-100"
+                onClick={(e) => e.stopPropagation()}
               >
                 {Object.values(LANGUAGES).map((lang) => (
-                  <option key={lang.name} value={lang.name} className="bg-gray-800 text-white">
+                  <option key={lang.name} value={lang.name} style={{ background: 'var(--surface)', color: 'var(--text-primary)' }}>
                     {lang.displayName}
                   </option>
                 ))}
               </select>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-1 px-3">
-            <button
-              onClick={() => setShowInput(!showInput)}
-              className={`p-2 rounded text-xs transition-colors ${
-                showInput 
-                  ? 'bg-blue-600 text-white' 
-                  : 'text-gray-400 hover:text-white hover:bg-gray-700'
-              }`}
-              title="Toggle input"
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
-              </svg>
             </button>
             
+            {/* Console Tab */}
             <button
-              onClick={resetCode}
-              className="p-2 rounded text-xs text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
-              title="Reset code"
+              className={`tab ${activeTab === 'console' ? 'active' : ''}`}
+              onClick={() => setActiveTab('console')}
             >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd"/>
+              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L7.586 10 5.293 7.707a1 1 0 010-1.414zM11 12a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd"/>
               </svg>
-            </button>
-
-            <button
-              onClick={clearOutput}
-              className="p-2 rounded text-xs text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
-              title="Clear output"
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clipRule="evenodd"/>
-                <path fillRule="evenodd" d="M10 5a2 2 0 00-2 2v6a2 2 0 002 2h4a2 2 0 002-2V7a2 2 0 00-2-2H10z" clipRule="evenodd"/>
-              </svg>
-            </button>
-
-            <button
-              onClick={executeCode}
-              disabled={isRunning || !editor.code.trim()}
-              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white px-3 py-2 rounded text-xs font-medium transition-colors flex items-center space-x-1"
-            >
-              {isRunning ? (
-                <>
-                  <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" strokeOpacity="0.3" />
-                    <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  <span>Running</span>
-                </>
-              ) : (
-                <>
-                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd"/>
-                  </svg>
-                  <span>Run</span>
-                </>
+              <span>Console</span>
+              {(editor.output || editor.error) && (
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: editor.error ? 'var(--error)' : 'var(--success)' }}></div>
               )}
             </button>
-
-            {onRemove && (
+            
+            {/* Preview Tab (for HTML/CSS) */}
+            {(editor.language === 'html' || editor.language === 'css') && (
               <button
-                onClick={() => onRemove(editor.id)}
-                className="p-2 rounded text-xs text-gray-400 hover:text-red-400 hover:bg-gray-700 transition-colors"
-                title="Remove editor"
+                className={`tab ${activeTab === 'preview' ? 'active' : ''}`}
+                onClick={() => setActiveTab('preview')}
               >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/>
+                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                  <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd"/>
+                </svg>
+                <span>Preview</span>
+              </button>
+            )}
+          </div>
+          
+          {/* Tab Actions */}
+          <div className="flex items-center space-x-1 px-3">
+            {activeTab === 'code' && (
+              <>
+                <button
+                  onClick={() => setShowInput(!showInput)}
+                  className={`btn btn-ghost p-1 text-xs ${
+                    showInput ? 'opacity-100' : 'opacity-60 hover:opacity-100'
+                  }`}
+                  title="Toggle input"
+                >
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+                  </svg>
+                </button>
+                
+                <button
+                  onClick={executeCode}
+                  disabled={isRunning || !editor.code.trim()}
+                  className="btn btn-success p-1 text-xs"
+                  title="Run code"
+                >
+                  {isRunning ? (
+                    <svg className="w-3 h-3 animate-spin" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" strokeOpacity="0.3" />
+                      <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd"/>
+                    </svg>
+                  )}
+                </button>
+              </>
+            )}
+            
+            {activeTab === 'console' && (
+              <button
+                onClick={clearOutput}
+                className="btn btn-ghost p-1 text-xs"
+                title="Clear output"
+              >
+                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clipRule="evenodd"/>
+                  <path fillRule="evenodd" d="M10 5a2 2 0 00-2 2v6a2 2 0 002 2h4a2 2 0 002-2V7a2 2 0 00-2-2H10z" clipRule="evenodd"/>
                 </svg>
               </button>
             )}
+            
+            {/* Menu Button */}
+            <div className="relative group">
+              <button className="btn btn-ghost p-1 text-xs" title="More options">
+                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
+                </svg>
+              </button>
+              
+              {/* Dropdown menu */}
+              <div className="absolute right-0 top-full mt-1 w-32 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 rounded-md" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+                <button
+                  onClick={resetCode}
+                  className="w-full px-3 py-1 text-left text-xs hover:bg-gray-700 transition-colors"
+                  style={{ color: 'var(--text-muted)' }}
+                >
+                  Reset
+                </button>
+                {onRemove && (
+                  <button
+                    onClick={() => onRemove(editor.id)}
+                    className="w-full px-3 py-1 text-left text-xs text-red-400 hover:bg-gray-700 transition-colors"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Input Section */}
-        {showInput && (
-          <div className="px-4 pb-3 bg-gray-800">
-            <label className="block text-xs font-medium text-gray-300 mb-2">
+        {showInput && activeTab === 'code' && (
+          <div className="px-4 pb-3" style={{ background: 'var(--surface)', borderTop: '1px solid var(--border)' }}>
+            <label className="block text-xs font-medium mb-2" style={{ color: 'var(--text-muted)' }}>
               Input (stdin):
             </label>
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Enter input for your program..."
-              className="w-full h-16 px-3 py-2 bg-gray-900 border border-gray-600 rounded text-sm text-white font-mono resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-500"
+              className="w-full h-16 px-3 py-2 rounded text-sm font-mono resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              style={{ 
+                background: 'var(--bg)', 
+                border: '1px solid var(--border)', 
+                color: 'var(--text-primary)'
+              }}
             />
           </div>
         )}
       </div>
 
-      {/* Code Editor */}
+      {/* Tab Content */}
       <div className="flex-1 min-h-0">
-        <Editor
-          height="100%"
-          language={getMonacoLanguage(editor.language)}
-          value={editor.code}
-          onChange={handleCodeChange}
-          theme="vs-dark"
-          options={{
-            minimap: { enabled: false },
-            fontSize: 14,
-            lineNumbers: 'on',
-            roundedSelection: false,
-            automaticLayout: true,
-            scrollBeyondLastLine: false,
-            wordWrap: 'on',
-            tabSize: 2,
-            insertSpaces: true,
-            padding: { top: 16, bottom: 16 },
-            fontFamily: 'JetBrains Mono, Fira Code, SF Mono, Monaco, Cascadia Code, Roboto Mono, Consolas, Courier New, monospace',
-            lineHeight: 1.6,
-          }}
-        />
-      </div>
-
-      {/* Output Section */}
-      <div className="h-32 border-t border-gray-700 bg-gray-900">
-        <div className="h-full flex flex-col">
-          <div className="flex items-center justify-between px-4 py-2 bg-gray-800 text-sm font-medium text-gray-300">
-            <span>Output</span>
-            {editor.error && (
-              <span className="text-red-400 text-xs flex items-center">
-                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
-                </svg>
-                Error
-              </span>
-            )}
-          </div>
-          <div className="flex-1 overflow-auto">
-            {editor.output && (
-              <pre className="p-4 text-sm font-mono text-green-300 whitespace-pre-wrap">
-                {editor.output}
-              </pre>
-            )}
-            {editor.error && (
-              <pre className="p-4 text-sm font-mono text-red-300 whitespace-pre-wrap">
-                {editor.error}
-              </pre>
-            )}
-            {!editor.output && !editor.error && (
-              <div className="p-4 text-sm text-gray-500 italic">
-                No output yet. Run your code to see results.
+        {activeTab === 'code' && (
+          <Editor
+            height="100%"
+            language={getMonacoLanguage(editor.language)}
+            value={editor.code}
+            onChange={handleCodeChange}
+            theme="vs-dark"
+            options={{
+              minimap: { enabled: false },
+              fontSize: 14,
+              lineNumbers: 'on',
+              roundedSelection: false,
+              automaticLayout: true,
+              scrollBeyondLastLine: false,
+              wordWrap: 'on',
+              tabSize: 2,
+              insertSpaces: true,
+              padding: { top: 16, bottom: 16 },
+              fontFamily: 'var(--font-mono)',
+              lineHeight: 1.6,
+              scrollbar: {
+                verticalScrollbarSize: 6,
+                horizontalScrollbarSize: 6,
+              },
+            }}
+          />
+        )}
+        
+        {activeTab === 'console' && (
+          <div className="h-full flex flex-col" style={{ background: 'var(--bg)' }}>
+            {/* Console Header */}
+            <div className="flex items-center justify-between px-4 py-2" style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Console</span>
+                {editor.error && (
+                  <span className="status-indicator status-error">
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
+                    </svg>
+                    Error
+                  </span>
+                )}
+                {editor.output && !editor.error && (
+                  <span className="status-indicator status-success">
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                    </svg>
+                    Success
+                  </span>
+                )}
               </div>
-            )}
+            </div>
+            
+            {/* Console Output */}
+            <div className="flex-1 overflow-auto">
+              {editor.output && (
+                <pre className="p-4 text-sm font-mono whitespace-pre-wrap" style={{ color: 'var(--success)' }}>
+                  {editor.output}
+                </pre>
+              )}
+              {editor.error && (
+                <pre className="p-4 text-sm font-mono whitespace-pre-wrap" style={{ color: 'var(--error)' }}>
+                  {editor.error}
+                </pre>
+              )}
+              {!editor.output && !editor.error && (
+                <div className="p-4 text-sm italic" style={{ color: 'var(--text-muted)' }}>
+                  No output yet. Run your code to see results.
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
+        
+        {activeTab === 'preview' && (editor.language === 'html' || editor.language === 'css') && (
+          <div className="h-full" style={{ background: 'var(--bg)' }}>
+            <iframe
+              srcDoc={editor.language === 'html' ? editor.code : `<style>${editor.code}</style><div>CSS Preview</div>`}
+              className="w-full h-full border-0"
+              style={{ background: 'white' }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,28 +1,40 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Design System Colors */
+  --bg: #0f172a;                    /* slate-900 - main background */
+  --surface: #1e293b;               /* slate-800 - panels/cards */
+  --surface-hover: #334155;         /* slate-700 - hover states */
+  --border: #475569;                /* slate-600 - borders */
+  --border-subtle: #64748b;         /* slate-500 - subtle borders */
+  --text-primary: #f8fafc;          /* slate-50 - primary text */
+  --text-secondary: #e2e8f0;        /* slate-200 - secondary text */
+  --text-muted: #94a3b8;            /* slate-400 - muted text */
+  --accent-primary: #3b82f6;        /* blue-500 - primary actions */
+  --accent-secondary: #8b5cf6;      /* purple-500 - secondary actions */
+  --success: #10b981;               /* emerald-500 - success states */
+  --warning: #f59e0b;               /* amber-500 - warning states */
+  --error: #ef4444;                 /* red-500 - error states */
+  
+  /* Environment Pills */
+  --env-test: #059669;              /* emerald-600 */
+  --env-dev: #7c3aed;               /* violet-600 */
+  --env-prod: #dc2626;              /* red-600 */
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-background: var(--bg);
+  --color-foreground: var(--text-primary);
+  --font-sans: Inter, system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Monaco, monospace;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 @import "tailwindcss/preflight";
@@ -34,47 +46,290 @@ html, body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background-color: #111827; /* gray-900 */
+  background-color: var(--bg);
 }
 
 #__next {
   height: 100%;
 }
 
-/* Custom scrollbar styles */
+/* Modern Scrollbar Styles */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--surface);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 4px;
+  background: var(--border);
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: var(--border-subtle);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--surface);
+}
+
+/* Panel Resize Handles */
+.react-resizable-handle {
+  position: relative;
+  background: var(--border);
+  transition: background-color 0.2s ease;
+}
+
+.react-resizable-handle:hover {
+  background: var(--accent-primary);
+}
+
+.react-resizable-handle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 3px;
+  height: 20px;
+  background: var(--text-muted);
+  border-radius: 2px;
+  transition: all 0.2s ease;
+}
+
+.react-resizable-handle:hover::after {
+  background: white;
+  width: 4px;
+  height: 24px;
 }
 
 /* Monaco Editor overrides */
 .monaco-editor {
-  font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace !important;
+  font-family: var(--font-mono) !important;
+  background: var(--surface) !important;
 }
 
-/* Animation for loading states */
+.monaco-editor .margin {
+  background: var(--surface) !important;
+}
+
+.monaco-editor .selected-text {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Tab Styles */
+.tab-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.tab {
+  position: relative;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab:hover {
+  background: var(--surface-hover);
+  color: var(--text-secondary);
+}
+
+.tab.active {
+  color: var(--text-primary);
+  background: var(--bg);
+}
+
+.tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent-primary);
+}
+
+.tab.dirty::before {
+  content: '•';
+  color: var(--warning);
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* Breadcrumbs */
+.breadcrumbs {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.breadcrumb-separator {
+  margin: 0 8px;
+  color: var(--border-subtle);
+}
+
+/* Status Indicators */
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-success {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--success);
+}
+
+.status-error {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--error);
+}
+
+.status-warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--warning);
+}
+
+.status-info {
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--accent-primary);
+}
+
+/* Animations */
 @keyframes pulse {
   0%, 100% {
     opacity: 1;
   }
   50% {
-    opacity: 0.5;
+    opacity: 0.6;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Button Variants */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--accent-primary);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--text-secondary);
+}
+
+.btn-success {
+  background: var(--success);
+  color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.btn-error {
+  background: var(--error);
+  color: white;
+}
+
+.btn-error:hover:not(:disabled) {
+  background: #dc2626;
 }
