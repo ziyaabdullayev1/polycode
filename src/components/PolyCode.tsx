@@ -572,14 +572,30 @@ export default function PolyCode() {
             {editors.map((editor, index) => (
               <div key={editor.id} className="contents">
                 <Panel defaultSize={100 / editors.length} minSize={20}>
-                  <CodeEditor
-                    editor={editor}
-                    onCodeChange={handleCodeChange}
-                    onLanguageChange={handleLanguageChange}
-                    onExecutionResult={handleExecutionResult}
-                    onRemove={editors.length > 1 ? removeEditor : undefined}
-                    className="h-full"
-                  />
+                  <div 
+                    className="persistent-panel-background"
+                                          style={{
+                        position: 'relative',
+                        height: '100%',
+                        backgroundImage: 'url("/social.jpg")',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat'
+                      }}
+                  >
+                    {/* Background overlay temporarily removed for testing */}
+                    {/* Code Editor */}
+                    <div style={{ position: 'relative', zIndex: 2, height: '100%' }}>
+                      <CodeEditor
+                        editor={editor}
+                        onCodeChange={handleCodeChange}
+                        onLanguageChange={handleLanguageChange}
+                        onExecutionResult={handleExecutionResult}
+                        onRemove={editors.length > 1 ? removeEditor : undefined}
+                        className="h-full"
+                      />
+                    </div>
+                  </div>
                 </Panel>
                 
                 {index < editors.length - 1 && (

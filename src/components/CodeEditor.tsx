@@ -113,7 +113,13 @@ export default function CodeEditor({
   const hasChanges = editor.code !== (LANGUAGES[editor.language]?.defaultCode || '');
 
   return (
-    <div className={`flex flex-col h-full overflow-hidden ${className}`} style={{ background: 'var(--surface)' }}>
+    <div 
+      className={`flex flex-col h-full overflow-hidden ${className}`} 
+      style={{ 
+        background: 'transparent'
+      }}
+    >
+      
       {/* Tab Bar */}
       <div className="tab-bar">
         <div className="flex items-center justify-between">
@@ -269,7 +275,7 @@ export default function CodeEditor({
       </div>
 
       {/* Tab Content */}
-      <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0" style={{ background: 'rgba(15, 23, 42, 0.95)' }}>
         {activeTab === 'code' && (
           <Editor
             height="100%"
