@@ -48,6 +48,94 @@ const sampleQuestions = [
       "You can solve this iteratively or recursively"
     ],
     tags: ["dynamic-programming", "recursion", "medium"]
+  },
+  {
+    title: "Reverse String",
+    description: "Write a function that reverses a string. The input string is given as an array of characters s.",
+    language: "javascript",
+    difficulty: "easy",
+    starterCode: `function reverseString(s) {
+    // Your code here
+    // Do not return anything, modify s in-place instead
+}`,
+    timeLimit: 300, // 5 minutes
+    testCases: [
+      {
+        input: `s = ["h","e","l","l","o"]`,
+        output: `["o","l","l","e","h"]`,
+        explanation: "The string 'hello' becomes 'olleh' when reversed."
+      },
+      {
+        input: `s = ["H","a","n","n","a","h"]`,
+        output: `["h","a","n","n","a","H"]`,
+        explanation: "The string 'Hannah' becomes 'hannaH' when reversed."
+      }
+    ],
+    hints: [
+      "Use two pointers, one at the beginning and one at the end",
+      "Swap characters and move pointers toward each other"
+    ],
+    tags: ["two-pointers", "string", "easy"]
+  },
+  {
+    title: "Binary Search",
+    description: "Given an array of integers nums which is sorted in ascending order, and an integer target, write a function to search target in nums. If target exists, then return its index. Otherwise, return -1.",
+    language: "python",
+    difficulty: "medium",
+    starterCode: `def search(nums, target):
+    # Your code here
+    return -1`,
+    timeLimit: 480, // 8 minutes
+    testCases: [
+      {
+        input: "nums = [-1,0,3,5,9,12], target = 9",
+        output: "4",
+        explanation: "9 exists in nums and its index is 4"
+      },
+      {
+        input: "nums = [-1,0,3,5,9,12], target = 2",
+        output: "-1",
+        explanation: "2 does not exist in nums so return -1"
+      }
+    ],
+    hints: [
+      "Use the divide and conquer approach",
+      "Compare target with the middle element to decide which half to search"
+    ],
+    tags: ["binary-search", "array", "divide-and-conquer", "medium"]
+  },
+  {
+    title: "Valid Parentheses",
+    description: "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid. An input string is valid if: Open brackets must be closed by the same type of brackets and in the correct order.",
+    language: "javascript", 
+    difficulty: "easy",
+    starterCode: `function isValid(s) {
+    // Your code here
+    return false;
+}`,
+    timeLimit: 420, // 7 minutes
+    testCases: [
+      {
+        input: `s = "()"`,
+        output: "true",
+        explanation: "The string contains valid parentheses."
+      },
+      {
+        input: `s = "()[]{}"`,
+        output: "true", 
+        explanation: "All brackets are properly matched and nested."
+      },
+      {
+        input: `s = "(]"`,
+        output: "false",
+        explanation: "The brackets are not properly matched."
+      }
+    ],
+    hints: [
+      "Use a stack data structure to keep track of opening brackets",
+      "When you encounter a closing bracket, check if it matches the most recent opening bracket"
+    ],
+    tags: ["stack", "string", "easy"]
   }
 ];
 

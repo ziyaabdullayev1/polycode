@@ -413,11 +413,29 @@ html, body {
   right: 0 !important;
   bottom: 0 !important;
   background: rgba(15, 23, 42, 0.45) !important;
-  z-index: 1 !important;
+  z-index: -1 !important;
   pointer-events: none !important;
 }
 
 .persistent-panel-background > * {
   position: relative !important;
-  z-index: 2 !important;
+  z-index: 1 !important;
+}
+
+/* Ensure dropdown menus are above background */
+.group:hover > div,
+.dropdown,
+.menu,
+[role="menu"] {
+  z-index: 100 !important;
+  position: relative !important;
+}
+
+/* Specific fix for tab bar dropdown menu */
+.tab-bar .group {
+  z-index: 102 !important;
+}
+
+.tab-bar .group > div {
+  z-index: 103 !important;
 }

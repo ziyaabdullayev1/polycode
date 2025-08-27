@@ -224,7 +224,7 @@ export default function CodeEditor({
             )}
             
             {/* Menu Button */}
-            <div className="relative group">
+            <div className="relative group" style={{ zIndex: 101 }}>
               <button className="btn btn-ghost p-1 text-xs" title="More options">
                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
@@ -232,7 +232,7 @@ export default function CodeEditor({
               </button>
               
               {/* Dropdown menu */}
-              <div className="absolute right-0 top-full mt-1 w-32 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 rounded-md" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+              <div className="absolute right-0 top-full mt-1 w-32 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 rounded-md" style={{ background: 'var(--surface)', border: '1px solid var(--border)', zIndex: 100 }}>
                 <button
                   onClick={resetCode}
                   className="w-full px-3 py-1 text-left text-xs hover:bg-gray-700 transition-colors"
