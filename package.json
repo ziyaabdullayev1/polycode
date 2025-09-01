@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "docs": "echo 'API documentation available at http://localhost:3000/docs'",
+    "docs:validate": "swagger-tools validate swagger.json",
+    "docs:serve": "swagger-ui-serve swagger.json"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
@@ -14,7 +17,9 @@
     "next": "15.3.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-resizable-panels": "^3.0.2"
+    "react-resizable-panels": "^3.0.2",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

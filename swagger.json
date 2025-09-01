@@ -1,0 +1,908 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "PolyCode API",
+    "description": "A comprehensive API for code execution, full-stack application deployment, question management, and health monitoring. PolyCode enables developers to execute code in multiple programming languages, create full-stack web applications, and manage coding interview questions.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "PolyCode Team",
+      "email": "support@polycode.dev"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Development server"
+    },
+    {
+      "url": "https://api.polycode.dev",
+      "description": "Production server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Code Execution",
+      "description": "Execute code in various programming languages"
+    },
+    {
+      "name": "Full-Stack Deployment",
+      "description": "Deploy full-stack web applications"
+    },
+    {
+      "name": "Question Management",
+      "description": "Manage coding interview questions"
+    },
+    {
+      "name": "Health Check",
+      "description": "Service health monitoring"
+    }
+  ],
+  "paths": {
+    "/api/execute": {
+      "post": {
+        "tags": ["Code Execution"],
+        "summary": "Execute code in specified programming language",
+        "description": "Executes code in various programming languages using the Piston API. Supports JavaScript, Python, Go, Java, C++, C#, TypeScript, PHP, HTML, and CSS.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecuteCodeRequest"
+              },
+              "examples": {
+                "javascript": {
+                  "summary": "JavaScript example",
+                  "value": {
+                    "code": "console.log('Hello, World!');",
+                    "language": "javascript",
+                    "input": ""
+                  }
+                },
+                "python": {
+                  "summary": "Python example",
+                  "value": {
+                    "code": "print('Hello, World!')",
+                    "language": "python",
+                    "input": ""
+                  }
+                },
+                "interactive": {
+                  "summary": "Interactive input example",
+                  "value": {
+                    "code": "name = input('Enter your name: ')\\nprint(f'Hello, {name}!')",
+                    "language": "python",
+                    "input": "John"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Code executed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExecuteCodeResponse"
+                },
+                "examples": {
+                  "success": {
+                    "summary": "Successful execution",
+                    "value": {
+                      "success": true,
+                      "output": "Hello, World!",
+                      "error": "",
+                      "exitCode": 0,
+                      "language": "javascript",
+                      "executionTime": null
+                    }
+                  },
+                  "html": {
+                    "summary": "HTML analysis",
+                    "value": {
+                      "success": true,
+                      "output": "HTML Document Preview:\\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\n📄 Document Type: HTML5\\n📊 Lines of code: 15\\n🏷️  Title: My Page\\n📱 Responsive: Yes\\n🎨 Inline CSS: No\\n⚡ JavaScript: Yes\\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\n\\n✅ HTML syntax appears valid\\n💡 Tip: Open this in a browser to see the rendered output\\n🌐 This HTML document is ready to be served!",
+                      "error": "",
+                      "exitCode": 0,
+                      "language": "html",
+                      "executionTime": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing required fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Code and language are required"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Code Execution"],
+        "summary": "Get available programming languages",
+        "description": "Returns a list of all supported programming languages with their versions and availability status.",
+        "responses": {
+          "200": {
+            "description": "List of available languages",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LanguagesResponse"
+                },
+                "example": {
+                  "languages": [
+                    {
+                      "name": "javascript",
+                      "version": "18.15.0",
+                      "available": true
+                    },
+                    {
+                      "name": "python",
+                      "version": "3.10.0",
+                      "available": true
+                    },
+                    {
+                      "name": "go",
+                      "version": "1.16.2",
+                      "available": true
+                    }
+                  ],
+                  "total": 10
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to fetch languages",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/fullstack": {
+      "post": {
+        "tags": ["Full-Stack Deployment"],
+        "summary": "Deploy a full-stack web application",
+        "description": "Creates and deploys a complete full-stack web application with frontend (HTML, CSS, JavaScript) and optional backend (Node.js/Express). Automatically sets up project structure, installs dependencies, and starts the server.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FullStackRequest"
+              },
+              "examples": {
+                "static-site": {
+                  "summary": "Static website",
+                  "value": {
+                    "html": "<!DOCTYPE html>\\n<html>\\n<head><title>My Site</title></head>\\n<body><h1>Welcome!</h1></body>\\n</html>",
+                    "css": "body { font-family: Arial; background: #f0f0f0; }",
+                    "javascript": "console.log('Site loaded!');"
+                  }
+                },
+                "full-stack": {
+                  "summary": "Full-stack application",
+                  "value": {
+                    "html": "<!DOCTYPE html>\\n<html>\\n<head><title>Todo App</title></head>\\n<body><div id='app'></div></body>\\n</html>",
+                    "css": ".todo { padding: 10px; border: 1px solid #ccc; }",
+                    "javascript": "fetch('/api/todos').then(r => r.json()).then(todos => console.log(todos));",
+                    "nodejs": "app.get('/api/todos', (req, res) => res.json([{id: 1, text: 'Learn PolyCode'}]));",
+                    "port": 3001
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Application deployed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullStackResponse"
+                },
+                "example": {
+                  "success": true,
+                  "projectId": "a1b2c3d4",
+                  "url": "http://localhost:3001",
+                  "message": "🚀 Full-stack application is running on port 3001!",
+                  "files": {
+                    "server.js": "✅ Express server with custom routes",
+                    "public/index.html": "🌐 HTML structure",
+                    "public/styles.css": "🎨 CSS styling",
+                    "public/script.js": "⚡ JavaScript functionality"
+                  },
+                  "features": {
+                    "frontend": true,
+                    "backend": true,
+                    "port": 3001,
+                    "endpoints": "Custom routes available"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - no code provided",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Deployment failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullStackErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/question": {
+      "post": {
+        "tags": ["Question Management"],
+        "summary": "Create or update a coding question",
+        "description": "Creates a new coding interview question or updates an existing one. Questions can include starter code, test cases, hints, and time limits.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuestionRequest"
+              },
+              "examples": {
+                "basic-question": {
+                  "summary": "Basic coding question",
+                  "value": {
+                    "title": "Two Sum",
+                    "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
+                    "language": "javascript",
+                    "difficulty": "easy",
+                    "starterCode": "function twoSum(nums, target) {\\n    // Your code here\\n}",
+                    "testCases": [
+                      {
+                        "input": "[2,7,11,15], 9",
+                        "expectedOutput": "[0,1]",
+                        "description": "nums[0] + nums[1] = 2 + 7 = 9"
+                      }
+                    ],
+                    "hints": ["Try using a hash map to store seen values"],
+                    "timeLimit": 30,
+                    "tags": ["array", "hash-table"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Question created/updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing required fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to create question",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Question Management"],
+        "summary": "Retrieve question(s)",
+        "description": "Retrieves a specific question by ID or lists all questions if no ID is provided.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "Question ID to retrieve",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "q_1703123456789_abc123def"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Question(s) retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/SingleQuestionResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AllQuestionsResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Question not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Question has expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Question Management"],
+        "summary": "Delete a question",
+        "description": "Permanently deletes a question by its ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "Question ID to delete",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Question deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Question ID is required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Question not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "tags": ["Health Check"],
+        "summary": "Check service health",
+        "description": "Returns the current health status of the PolyCode API service.",
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                },
+                "example": {
+                  "status": "healthy",
+                  "timestamp": "2024-01-15T10:30:00.000Z",
+                  "service": "polycode-app"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ExecuteCodeRequest": {
+        "type": "object",
+        "required": ["code", "language"],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "The source code to execute",
+            "example": "console.log('Hello, World!');"
+          },
+          "language": {
+            "type": "string",
+            "description": "Programming language",
+            "enum": ["javascript", "python", "go", "java", "cpp", "csharp", "typescript", "php", "html", "css"],
+            "example": "javascript"
+          },
+          "input": {
+            "type": "string",
+            "description": "Standard input for the program",
+            "default": "",
+            "example": "John\\nDoe"
+          }
+        }
+      },
+      "ExecuteCodeResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether execution was successful"
+          },
+          "output": {
+            "type": "string",
+            "description": "Standard output from the program"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error output or empty string"
+          },
+          "exitCode": {
+            "type": "integer",
+            "description": "Exit code of the program"
+          },
+          "language": {
+            "type": "string",
+            "description": "Programming language used"
+          },
+          "executionTime": {
+            "type": ["string", "null"],
+            "description": "Execution time or signal information"
+          }
+        }
+      },
+      "LanguagesResponse": {
+        "type": "object",
+        "properties": {
+          "languages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Language"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total number of supported languages"
+          }
+        }
+      },
+      "Language": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Language name"
+          },
+          "version": {
+            "type": "string",
+            "description": "Language version"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "Whether the language is currently available"
+          }
+        }
+      },
+      "FullStackRequest": {
+        "type": "object",
+        "properties": {
+          "html": {
+            "type": "string",
+            "description": "HTML content for the frontend"
+          },
+          "css": {
+            "type": "string",
+            "description": "CSS styles for the frontend"
+          },
+          "javascript": {
+            "type": "string",
+            "description": "Client-side JavaScript code"
+          },
+          "nodejs": {
+            "type": "string",
+            "description": "Server-side Node.js/Express code"
+          },
+          "port": {
+            "type": "integer",
+            "description": "Port number for the server",
+            "default": 3001,
+            "minimum": 3000,
+            "maximum": 9999
+          }
+        }
+      },
+      "FullStackResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "projectId": {
+            "type": "string",
+            "description": "Unique project identifier"
+          },
+          "url": {
+            "type": "string",
+            "description": "URL where the application is running"
+          },
+          "message": {
+            "type": "string",
+            "description": "Status message"
+          },
+          "files": {
+            "type": "object",
+            "description": "Created files and their descriptions",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "features": {
+            "type": "object",
+            "properties": {
+              "frontend": {
+                "type": "boolean"
+              },
+              "backend": {
+                "type": "boolean"
+              },
+              "port": {
+                "type": "integer"
+              },
+              "endpoints": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "FullStackErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [false]
+          },
+          "error": {
+            "type": "string"
+          },
+          "projectId": {
+            "type": "string"
+          },
+          "suggestion": {
+            "type": "string"
+          }
+        }
+      },
+      "QuestionRequest": {
+        "type": "object",
+        "required": ["title", "description"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Question ID (auto-generated if not provided)"
+          },
+          "title": {
+            "type": "string",
+            "description": "Question title",
+            "example": "Two Sum"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed question description",
+            "example": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target."
+          },
+          "language": {
+            "type": "string",
+            "description": "Programming language for the question",
+            "default": "javascript",
+            "enum": ["javascript", "python", "go", "java", "cpp", "csharp", "typescript", "php"]
+          },
+          "difficulty": {
+            "type": "string",
+            "description": "Question difficulty level",
+            "enum": ["easy", "medium", "hard"],
+            "default": "medium"
+          },
+          "starterCode": {
+            "type": "string",
+            "description": "Initial code template"
+          },
+          "expectedOutput": {
+            "type": "string",
+            "description": "Expected output description"
+          },
+          "testCases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TestCase"
+            }
+          },
+          "hints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Helpful hints for solving the question"
+          },
+          "timeLimit": {
+            "type": "integer",
+            "description": "Time limit in minutes"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Question tags/categories"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Question expiration date"
+          }
+        }
+      },
+      "TestCase": {
+        "type": "object",
+        "required": ["input", "expectedOutput"],
+        "properties": {
+          "input": {
+            "type": "string",
+            "description": "Test case input"
+          },
+          "expectedOutput": {
+            "type": "string",
+            "description": "Expected output for the input"
+          },
+          "description": {
+            "type": "string",
+            "description": "Test case description"
+          }
+        }
+      },
+      "QuestionResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "questionId": {
+            "type": "string"
+          },
+          "question": {
+            "$ref": "#/components/schemas/QuestionData"
+          },
+          "url": {
+            "type": "string",
+            "description": "URL to access the question"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "QuestionData": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": ["easy", "medium", "hard"]
+          },
+          "starterCode": {
+            "type": "string"
+          },
+          "expectedOutput": {
+            "type": "string"
+          },
+          "testCases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TestCase"
+            }
+          },
+          "hints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "timeLimit": {
+            "type": "integer"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SingleQuestionResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "question": {
+            "$ref": "#/components/schemas/QuestionData"
+          }
+        }
+      },
+      "AllQuestionsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionSummary"
+            }
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "QuestionSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "difficulty": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["healthy"]
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "service": {
+            "type": "string"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message"
+          }
+        }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

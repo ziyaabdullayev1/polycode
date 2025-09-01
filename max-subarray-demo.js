@@ -82,3 +82,4 @@ console.log(`[1] => ${maxSubArraySimple([1])}`);
 console.log(`[5,4,-1,7,8] => ${maxSubArraySimple([5,4,-1,7,8])}`);
 console.log(`[-1,-2,-3,-4] => ${maxSubArraySimple([-1,-2,-3,-4])}`);
 
+
