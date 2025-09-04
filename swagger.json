@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "PolyCode API",
-    "description": "A comprehensive API for code execution, full-stack application deployment, question management, and health monitoring. PolyCode enables developers to execute code in multiple programming languages, create full-stack web applications, and manage coding interview questions.",
+    "title": "polycode",
+    "description": "Everything about your Code Execution Platform",
     "version": "1.0.0",
     "contact": {
       "name": "PolyCode Team",
@@ -25,27 +25,27 @@
   ],
   "tags": [
     {
-      "name": "Code Execution",
-      "description": "Execute code in various programming languages"
+      "name": "execute",
+      "description": "Execute code in multiple programming languages"
     },
     {
-      "name": "Full-Stack Deployment",
-      "description": "Deploy full-stack web applications"
+      "name": "fullstack",
+      "description": "Deploy complete web applications"
     },
     {
-      "name": "Question Management",
+      "name": "question",
       "description": "Manage coding interview questions"
     },
     {
-      "name": "Health Check",
-      "description": "Service health monitoring"
+      "name": "health",
+      "description": "Service monitoring and status"
     }
   ],
   "paths": {
     "/api/execute": {
       "post": {
-        "tags": ["Code Execution"],
-        "summary": "Execute code in specified programming language",
+        "tags": ["execute"],
+        "summary": "Executes code in specified language",
         "description": "Executes code in various programming languages using the Piston API. Supports JavaScript, Python, Go, Java, C++, C#, TypeScript, PHP, HTML, and CSS.",
         "requestBody": {
           "required": true,
@@ -144,8 +144,8 @@
         }
       },
       "get": {
-        "tags": ["Code Execution"],
-        "summary": "Get available programming languages",
+        "tags": ["execute"],
+        "summary": "Find available languages",
         "description": "Returns a list of all supported programming languages with their versions and availability status.",
         "responses": {
           "200": {
@@ -193,8 +193,8 @@
     },
     "/api/fullstack": {
       "post": {
-        "tags": ["Full-Stack Deployment"],
-        "summary": "Deploy a full-stack web application",
+        "tags": ["fullstack"],
+        "summary": "Deploy a new application to the platform",
         "description": "Creates and deploys a complete full-stack web application with frontend (HTML, CSS, JavaScript) and optional backend (Node.js/Express). Automatically sets up project structure, installs dependencies, and starts the server.",
         "requestBody": {
           "required": true,
@@ -280,8 +280,8 @@
     },
     "/api/question": {
       "post": {
-        "tags": ["Question Management"],
-        "summary": "Create or update a coding question",
+        "tags": ["question"],
+        "summary": "Add a new question to the platform",
         "description": "Creates a new coding interview question or updates an existing one. Questions can include starter code, test cases, hints, and time limits.",
         "requestBody": {
           "required": true,
@@ -349,8 +349,8 @@
         }
       },
       "get": {
-        "tags": ["Question Management"],
-        "summary": "Retrieve question(s)",
+        "tags": ["question"],
+        "summary": "Find question by ID",
         "description": "Retrieves a specific question by ID or lists all questions if no ID is provided.",
         "parameters": [
           {
@@ -405,8 +405,8 @@
         }
       },
       "delete": {
-        "tags": ["Question Management"],
-        "summary": "Delete a question",
+        "tags": ["question"],
+        "summary": "Deletes a question",
         "description": "Permanently deletes a question by its ID.",
         "parameters": [
           {
@@ -455,8 +455,8 @@
     },
     "/api/health": {
       "get": {
-        "tags": ["Health Check"],
-        "summary": "Check service health",
+        "tags": ["health"],
+        "summary": "Check platform health",
         "description": "Returns the current health status of the PolyCode API service.",
         "responses": {
           "200": {

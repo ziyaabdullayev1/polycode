@@ -1,6 +1,20 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
+
+// Dynamically import the component with no SSR to avoid hydration issues
+const SwaggerDocsContent = dynamic(() => Promise.resolve(SwaggerDocsContentComponent), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Loading documentation...</p>
+      </div>
+    </div>
+  )
+});
 
 declare global {
   interface Window {
@@ -8,10 +22,18 @@ declare global {
   }
 }
 
-export default function SwaggerDocsPage() {
+function SwaggerDocsContentComponent() {
+  const [isLoaded, setIsLoaded] = useState(false);
+
   useEffect(() => {
     // Load Swagger UI from CDN
     const loadSwaggerUI = () => {
+      // Check if already loaded
+      if (document.querySelector('link[href*="swagger-ui.css"]')) {
+        initializeSwaggerUI();
+        return;
+      }
+
       // Load CSS
       const link = document.createElement('link');
       link.rel = 'stylesheet';
@@ -22,179 +44,140 @@ export default function SwaggerDocsPage() {
       const script = document.createElement('script');
       script.src = 'https://unpkg.com/swagger-ui-dist@4.19.0/swagger-ui-bundle.js';
       script.onload = () => {
-        // Initialize Swagger UI
-        if (window.SwaggerUIBundle) {
-          window.SwaggerUIBundle({
-            url: '/api/docs',
-            dom_id: '#swagger-ui-container',
-            deepLinking: true,
-            presets: [
-              window.SwaggerUIBundle.presets.apis,
-              window.SwaggerUIBundle.presets.standalone
-            ],
-            plugins: [
-              window.SwaggerUIBundle.plugins.DownloadUrl
-            ],
-            layout: 'StandaloneLayout',
-            tryItOutEnabled: true,
-            filter: true,
-            supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
-            onComplete: () => {
-              console.log('Swagger UI loaded successfully');
-            }
-          });
+        initializeSwaggerUI();
+      };
+      script.onerror = () => {
+        console.error('Failed to load Swagger UI script');
+        const loadingState = document.getElementById('loading-state');
+        if (loadingState) {
+          loadingState.innerHTML = '<div class="text-center"><p class="text-red-600">Failed to load Swagger UI. Please refresh the page.</p></div>';
         }
       };
       document.head.appendChild(script);
     };
 
-    loadSwaggerUI();
+    const initializeSwaggerUI = () => {
+      if (window.SwaggerUIBundle) {
+        window.SwaggerUIBundle({
+          url: '/api/docs',
+          dom_id: '#swagger-ui-container',
+          deepLinking: true,
+          presets: [
+            window.SwaggerUIBundle.presets.apis,
+            window.SwaggerUIBundle.presets.standalone
+          ],
+          plugins: [
+            window.SwaggerUIBundle.plugins.DownloadUrl
+          ],
+          tryItOutEnabled: true,
+          filter: true,
+          supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
+          docExpansion: 'list',
+          defaultModelsExpandDepth: 1,
+          defaultModelExpandDepth: 1,
+          showExtensions: true,
+          showCommonExtensions: true,
+          onComplete: () => {
+            console.log('Swagger UI loaded successfully');
+            setIsLoaded(true);
+            // Hide loading state
+            const loadingState = document.getElementById('loading-state');
+            if (loadingState) {
+              loadingState.style.display = 'none';
+            }
+          },
+          onFailure: (error: any) => {
+            console.error('Swagger UI failed to load:', error);
+            const loadingState = document.getElementById('loading-state');
+            if (loadingState) {
+              loadingState.innerHTML = '<div class="text-center"><p class="text-red-600">Failed to load API documentation. Please refresh the page.</p></div>';
+            }
+          }
+        });
+      }
+    };
+
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      loadSwaggerUI();
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center">
-              <h1 className="text-3xl font-bold text-gray-900">PolyCode API Documentation</h1>
-              <span className="ml-3 inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                v1.0.0
-              </span>
-            </div>
-            <div className="flex items-center space-x-4">
-              <a
-                href="/api/health"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Health Check
-              </a>
-              <a
-                href="/"
-                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Back to App
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Overview */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">API Overview</h2>
-          <p className="text-gray-600 mb-6">
-            The PolyCode API provides comprehensive functionality for code execution, full-stack application deployment, 
-            question management, and health monitoring. This interactive documentation allows you to explore and test 
-            all available endpoints.
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-blue-50 rounded-lg p-4">
-              <h3 className="font-medium text-blue-900 mb-2">Code Execution</h3>
-              <p className="text-sm text-blue-700">Execute code in 10+ programming languages</p>
-            </div>
-            <div className="bg-green-50 rounded-lg p-4">
-              <h3 className="font-medium text-green-900 mb-2">Full-Stack Deployment</h3>
-              <p className="text-sm text-green-700">Deploy complete web applications instantly</p>
-            </div>
-            <div className="bg-purple-50 rounded-lg p-4">
-              <h3 className="font-medium text-purple-900 mb-2">Question Management</h3>
-              <p className="text-sm text-purple-700">Create and manage coding interview questions</p>
-            </div>
-            <div className="bg-orange-50 rounded-lg p-4">
-              <h3 className="font-medium text-orange-900 mb-2">Health Monitoring</h3>
-              <p className="text-sm text-orange-700">Monitor service health and status</p>
-            </div>
-          </div>
-
-          <div className="mt-6 flex flex-wrap gap-2">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-              OpenAPI 3.0
-            </span>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-              REST API
-            </span>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-              JSON
-            </span>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-              Next.js API Routes
-            </span>
-          </div>
-        </div>
-
-        {/* Quick Start */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Start</h2>
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-2">1. Execute Code</h3>
-              <div className="bg-gray-50 rounded-md p-3">
-                <code className="text-sm text-gray-800">
-                  POST /api/execute<br/>
-                  {`{ "code": "console.log('Hello, World!');", "language": "javascript" }`}
-                </code>
+    <>
+      <div className="min-h-screen bg-gray-50" style={{ height: 'auto', overflow: 'visible' }}>
+        {/* Header */}
+        <div className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center py-6">
+              <div className="flex items-center">
+                <h1 className="text-3xl font-bold text-gray-900">polycode API Documentation</h1>
+                <span className="ml-3 inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                  v1.0.0
+                </span>
               </div>
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-2">2. Deploy Full-Stack App</h3>
-              <div className="bg-gray-50 rounded-md p-3">
-                <code className="text-sm text-gray-800">
-                  POST /api/fullstack<br/>
-                  {`{ "html": "...", "css": "...", "javascript": "...", "nodejs": "..." }`}
-                </code>
-              </div>
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-2">3. Create Question</h3>
-              <div className="bg-gray-50 rounded-md p-3">
-                <code className="text-sm text-gray-800">
-                  POST /api/question<br/>
-                  {`{ "title": "Two Sum", "description": "...", "language": "javascript" }`}
-                </code>
+              <div className="flex items-center space-x-4">
+                <a
+                  href="/api/health"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Health Check
+                </a>
+                <a
+                  href="/"
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Back to App
+                </a>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Swagger UI Container */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        {/* Swagger UI Container - Full Width with proper scrolling */}
+        <div className="w-full bg-white" style={{ minHeight: 'calc(100vh - 100px)', overflow: 'auto' }}>
           <div 
             id="swagger-ui-container" 
-            className="swagger-ui-container"
-            style={{ minHeight: '600px' }}
+            className="swagger-ui-container w-full"
+            style={{ 
+              minHeight: '100%',
+              height: 'auto',
+              padding: '20px',
+              backgroundColor: 'white',
+              overflow: 'visible'
+            }}
           >
             {/* Loading state */}
-            <div className="flex items-center justify-center p-12">
+            <div id="loading-state" className="flex items-center justify-center p-12">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"></div>
                 <p className="text-gray-600">Loading interactive API documentation...</p>
+                <p className="text-sm text-gray-500 mt-2">If this takes too long, try refreshing the page.</p>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <div className="mt-12 border-t border-gray-200 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="text-center text-sm text-gray-500">
-            <p>© 2024 PolyCode. Built with Next.js and Swagger UI.</p>
           </div>
         </div>
       </div>
 
       {/* Swagger UI Styles */}
       <style jsx global>{`
+        body {
+          overflow: auto !important;
+        }
+        
+        .swagger-ui-container {
+          overflow: visible !important;
+          height: auto !important;
+        }
+        
         .swagger-ui-container .swagger-ui {
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+          height: auto !important;
+          overflow: visible !important;
         }
         
         .swagger-ui-container .swagger-ui .topbar {
@@ -214,18 +197,39 @@ export default function SwaggerDocsPage() {
         }
         
         .swagger-ui-container .swagger-ui .opblock.opblock-post {
-          border-color: #10b981;
-          background: rgba(16, 185, 129, 0.1);
+          border-color: #49cc90;
+          background: rgba(73, 204, 144, 0.1);
+        }
+        
+        .swagger-ui-container .swagger-ui .opblock.opblock-post .opblock-summary-method {
+          background: #49cc90;
         }
         
         .swagger-ui-container .swagger-ui .opblock.opblock-get {
-          border-color: #3b82f6;
-          background: rgba(59, 130, 246, 0.1);
+          border-color: #61affe;
+          background: rgba(97, 175, 254, 0.1);
+        }
+        
+        .swagger-ui-container .swagger-ui .opblock.opblock-get .opblock-summary-method {
+          background: #61affe;
         }
         
         .swagger-ui-container .swagger-ui .opblock.opblock-delete {
-          border-color: #ef4444;
-          background: rgba(239, 68, 68, 0.1);
+          border-color: #f93e3e;
+          background: rgba(249, 62, 62, 0.1);
+        }
+        
+        .swagger-ui-container .swagger-ui .opblock.opblock-delete .opblock-summary-method {
+          background: #f93e3e;
+        }
+        
+        .swagger-ui-container .swagger-ui .opblock.opblock-put {
+          border-color: #fca130;
+          background: rgba(252, 161, 48, 0.1);
+        }
+        
+        .swagger-ui-container .swagger-ui .opblock.opblock-put .opblock-summary-method {
+          background: #fca130;
         }
         
         .swagger-ui-container .swagger-ui .opblock-summary {
@@ -241,7 +245,18 @@ export default function SwaggerDocsPage() {
           background-color: #4338ca;
           border-color: #4338ca;
         }
+        
+        .swagger-ui-container .swagger-ui .opblock-tag {
+          font-size: 18px;
+          font-weight: 700;
+          color: #3b4151;
+          margin: 20px 0 5px 0;
+        }
       `}</style>
-    </div>
+    </>
   );
+}
+
+export default function SwaggerDocsPage() {
+  return <SwaggerDocsContent />;
 }
